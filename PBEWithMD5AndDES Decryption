@@ -1,0 +1,53 @@
+import javax.crypto.Cipher;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.SecretKey;
+import java.util.Scanner;
+
+public class PBEWithMD5AndDESDecryptor {
+    public static void main(String[] args) throws Exception {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter the password: ");
+        String password = input.nextLine();
+        
+        System.out.print("Enter the random salt value (without spaces): ");
+        String saltHex = input.nextLine();
+        byte[] salt = hexStringToByteArray(saltHex);
+        
+        System.out.print("Enter the encrypted data (without spaces): ");
+        String encryptedDataHex = input.nextLine();
+        byte[] encryptedData = hexStringToByteArray(encryptedDataHex);
+        
+        // Generate the encryption key
+        PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray());
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
+        SecretKey secretKey = keyFactory.generateSecret(pbeKeySpec);
+        
+        // Decrypt data
+        Cipher cipher = Cipher.getInstance("PBEWithMD5AndDES");
+        PBEParameterSpec pbeParameterSpec = new PBEParameterSpec(salt, 1000);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, pbeParameterSpec);
+        byte[] decryptedData = cipher.doFinal(encryptedData);
+        System.out.println(new String(decryptedData)); // "Hello World"
+    }
+    
+    // Define the printBytes method
+    public static void printBytes(byte[] bytes) {
+        for(byte b : bytes) {
+            System.out.printf("%02x ", b);
+        }
+        System.out.println();
+    }
+    
+    // Define the hexStringToByteArray method
+    public static byte[] hexStringToByteArray(String hex) {
+        int len = hex.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+            + Character.digit(hex.charAt(i+1), 16));
+        }
+        return data;
+    }
+}
