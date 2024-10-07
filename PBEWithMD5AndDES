@@ -1,0 +1,54 @@
+import javax.crypto.Cipher;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.SecretKey;
+import java.security.SecureRandom;
+import java.util.Scanner;
+
+public class PBEWithMD5AndDES {
+    public static void main(String[] args) throws Exception {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter a password: ");
+        String password = input.nextLine();
+        
+        // Generate a random salt value (8 bytes long)
+        byte[] salt = new byte[8];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(salt);
+        System.out.println("Random Salt:");
+        printBytes(salt);
+        
+        // Generate the encryption key
+        PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray());
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
+        SecretKey secretKey = keyFactory.generateSecret(pbeKeySpec);
+        
+        // Print the secret key
+        System.out.println("Secret Key:");
+        printBytes(secretKey.getEncoded());
+
+        // Encrypt data
+        Cipher cipher = Cipher.getInstance("PBEWithMD5AndDES");
+        PBEParameterSpec pbeParameterSpec = new PBEParameterSpec(salt, 1000);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, pbeParameterSpec);
+        byte[] encryptedData = cipher.doFinal("Hello World".getBytes());
+        
+        // Print the encrypted data
+        System.out.println("Encrypted Data:");
+        printBytes(encryptedData);
+
+        // Decrypt data
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, pbeParameterSpec);
+        byte[] decryptedData = cipher.doFinal(encryptedData);
+        System.out.println(new String(decryptedData)); // "Hello, World!"
+    }
+    
+    // Define the printBytes method
+    public static void printBytes(byte[] bytes) {
+        for(byte b : bytes) {
+            System.out.printf("%02x ", b);
+        }
+        System.out.println();
+    }
+}
