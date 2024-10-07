@@ -1,0 +1,31 @@
+import java.util.Scanner;
+
+public class SigmaEncryption {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter text: ");
+        String plaintext = input.nextLine();
+        int key = 5; // Encryption key
+
+        String ciphertext = encrypt(plaintext, key);
+        System.out.println("Plaintext: " + plaintext);
+        System.out.println("Ciphertext: " + ciphertext);
+    }
+
+    public static String encrypt(String plaintext, int key) {
+        StringBuilder ciphertext = new StringBuilder();
+
+        for (char c : plaintext.toCharArray()) {
+            if (Character.isLetter(c)) {
+                char base = Character.isUpperCase(c) ? 'A' : 'a';
+                // https://stackoverflow.com/questions/40209348/
+                int position = c - base;
+                int newPosition = (position + key * position) % 26;
+                ciphertext.append((char) (newPosition + base));
+            } else {
+                ciphertext.append(c); // Non-alphabetic characters remain unchanged
+            }
+        }
+        return ciphertext.toString();
+    }
+}
